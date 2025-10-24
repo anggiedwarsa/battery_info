@@ -9,7 +9,8 @@ void main() {
 
   group("$BatteryInfoPlugin ", () {
     setUp(() async {
-      BatteryInfoPlugin.methodChannel.setMockMethodCallHandler((MethodCall methodCall) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(BatteryInfoPlugin.methodChannel, (MethodCall methodCall) async {
         switch (methodCall.method) {
           case 'getBatteryInfo':
             return (AndroidBatteryInfo()
@@ -21,21 +22,29 @@ void main() {
         }
       });
 
-      MethodChannel(BatteryInfoPlugin.streamChannel.name).setMockMethodCallHandler((MethodCall methodCall) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(MethodChannel(BatteryInfoPlugin.streamChannel.name), (MethodCall methodCall) async {
         switch (methodCall.method) {
           case 'listen':
-            await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+            await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
               BatteryInfoPlugin.streamChannel.name,
               BatteryInfoPlugin.streamChannel.codec
                   .encodeSuccessEnvelope((AndroidBatteryInfo()..health = "healthy").toJson()),
               (_) {},
             );
-            break;
+            return null;
           case 'cancel':
           default:
             return null;
         }
       });
+    });
+
+    tearDown(() async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(BatteryInfoPlugin.methodChannel, null);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(MethodChannel(BatteryInfoPlugin.streamChannel.name), null);
     });
 
     test("getBatteryInfo for Android", () async {
@@ -52,7 +61,8 @@ void main() {
 
   group("$BatteryInfoPlugin IOS", () {
     setUp(() async {
-      BatteryInfoPlugin.methodChannel.setMockMethodCallHandler((MethodCall methodCall) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(BatteryInfoPlugin.methodChannel, (MethodCall methodCall) async {
         switch (methodCall.method) {
           case 'getBatteryInfo':
             return (IosBatteryInfo()..batteryLevel = 60).toJson();
@@ -61,21 +71,29 @@ void main() {
         }
       });
 
-      MethodChannel(BatteryInfoPlugin.streamChannel.name).setMockMethodCallHandler((MethodCall methodCall) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(MethodChannel(BatteryInfoPlugin.streamChannel.name), (MethodCall methodCall) async {
         switch (methodCall.method) {
           case 'listen':
-            await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+            await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
               BatteryInfoPlugin.streamChannel.name,
               BatteryInfoPlugin.streamChannel.codec
                   .encodeSuccessEnvelope((IosBatteryInfo()..batteryLevel = 60).toJson()),
               (_) {},
             );
-            break;
+            return null;
           case 'cancel':
           default:
             return null;
         }
       });
+    });
+
+    tearDown(() async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(BatteryInfoPlugin.methodChannel, null);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(MethodChannel(BatteryInfoPlugin.streamChannel.name), null);
     });
 
     test("getBatteryInfo for IOS", () async {

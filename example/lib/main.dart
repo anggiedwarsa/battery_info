@@ -19,62 +19,56 @@ class MyApp extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              FutureBuilder<AndroidBatteryInfo>(
+              FutureBuilder<AndroidBatteryInfo?>(
                   future: BatteryInfoPlugin().androidBatteryInfo,
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
-                      return Text(
-                          'Battery Health: ${snapshot.data.health.toUpperCase()}');
+                      return Text('Battery Health: ${snapshot.data?.health?.toUpperCase()}');
                     }
                     return CircularProgressIndicator();
                   }),
               SizedBox(
                 height: 20,
               ),
-              StreamBuilder<AndroidBatteryInfo>(
+              StreamBuilder<AndroidBatteryInfo?>(
                   stream: BatteryInfoPlugin().androidBatteryInfoStream,
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return Column(
                         children: [
-                          Text("Voltage: ${(snapshot.data.voltage)} mV"),
+                          Text("Voltage: ${(snapshot.data?.voltage)} mV"),
                           SizedBox(
                             height: 20,
                           ),
-                          Text(
-                              "Charging status: ${(snapshot.data.chargingStatus.toString().split(".")[1])}"),
+                          Text("Charging status: ${(snapshot.data?.chargingStatus.toString().split(".")[1])}"),
                           SizedBox(
                             height: 20,
                           ),
-                          Text(
-                              "Battery Level: ${(snapshot.data.batteryLevel)} %"),
+                          Text("Battery Level: ${(snapshot.data?.batteryLevel)} %"),
                           SizedBox(
                             height: 20,
                           ),
-                          Text(
-                              "Battery Capacity: ${(snapshot.data.batteryCapacity/1000)} mAh"),
+                          Text("Battery Capacity: ${((snapshot.data?.batteryCapacity ?? 0) / 1000)} mAh"),
                           SizedBox(
                             height: 20,
                           ),
-                          Text("Technology: ${(snapshot.data.technology)} "),
+                          Text("Technology: ${(snapshot.data?.technology)} "),
                           SizedBox(
                             height: 20,
                           ),
-                          Text(
-                              "Battery present: ${snapshot.data.present ? "Yes" : "False"} "),
+                          Text("Battery present: ${(snapshot.data?.present ?? false) ? "Yes" : "False"} "),
                           SizedBox(
                             height: 20,
                           ),
-                          Text("Scale: ${(snapshot.data.scale)} "),
+                          Text("Scale: ${(snapshot.data?.scale)} "),
                           SizedBox(
                             height: 20,
                           ),
-                          Text(
-                              "Remaining energy: ${-(snapshot.data.remainingEnergy * 1.0E-9)} Watt-hours,"),
+                          Text("Remaining energy: ${-((snapshot.data?.remainingEnergy ?? 0) * 1.0E-9)} Watt-hours,"),
                           SizedBox(
                             height: 20,
                           ),
-                          _getChargeTime(snapshot.data),
+                          if (snapshot.data != null) _getChargeTime(snapshot.data!),
                         ],
                       );
                     }
@@ -91,8 +85,7 @@ class MyApp extends StatelessWidget {
     if (data.chargingStatus == ChargingStatus.Charging) {
       return data.chargeTimeRemaining == -1
           ? Text("Calculating charge time remaining")
-          : Text(
-              "Charge time remaining: ${(data.chargeTimeRemaining / 1000 / 60).truncate()} minutes");
+          : Text("Charge time remaining: ${((data.chargeTimeRemaining ?? 0) / 1000 / 60).truncate()} minutes");
     }
     return Text("Battery is full or not connected to a power source");
   }
